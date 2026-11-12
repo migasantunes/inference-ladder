@@ -1,0 +1,29 @@
+# Keep the build context small: the image only needs pyproject.toml, README.md and src/.
+.git
+.github
+.venv
+venv
+**/__pycache__
+**/*.py[cod]
+*.egg-info
+.pytest_cache
+.ruff_cache
+build
+dist
+
+# Models, exports and results never go into the image through the build context.
+artifacts
+results
+*.onnx
+*.gguf
+
+# Not needed at run time.
+tests
+docs
+loadtest
+data
+
+# Editor and OS noise
+.vscode
+.idea
+.DS_Store

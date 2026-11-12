@@ -56,7 +56,7 @@ class GenerationResult:
     def inter_token_s(self) -> list[float]:
         """Gaps between consecutive tokens, excluding the first token."""
         t = self.token_times_s
-        return [b - a for a, b in zip(t[:-1], t[1:])]
+        return [b - a for a, b in zip(t[:-1], t[1:], strict=True)]
 
     @property
     def decode_tokens_per_s(self) -> float:
