@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+build/
+dist/
+
+# Exported and quantized models, downloaded weights
+artifacts/
+*.onnx
+*.gguf
+
+# Editor and OS noise
+.vscode/
+.idea/
+.DS_Store
