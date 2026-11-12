@@ -13,6 +13,11 @@ CPU, KV-cache on. Every other rung is reported as a ratio against this one.
 
 - Loads with `AutoModelForCausalLM` and `AutoTokenizer`, `eval()` mode,
   `torch.inference_mode()` around every forward pass.
+- Float32 is requested explicitly at load time. Recent versions of the
+  transformers library load a model in the dtype named in its config, which for
+  some models is a 16-bit float; without the explicit request the baseline would
+  silently not be fp32. The backend raises an error if the loaded model is not
+  float32.
 - Generation is a hand-written greedy loop, not `model.generate`. First step:
   the whole prompt goes in and returns logits plus `past_key_values`. Each later
   step: only the last token and the cache go in. A timestamp is taken after each

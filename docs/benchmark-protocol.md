@@ -32,14 +32,19 @@ Reported per rung:
 | `decode_tps_median` | Per generation, `(tokens − 1) / (total − ttft)`; median over generations. Steady-state decoding speed. |
 | `e2e_tps_median` | Per generation, `tokens / total`; median over generations. What a caller experiences. |
 | `load_time_s` | Wall time to construct the backend. |
-| `rss_after_load_mb`, `peak_rss_mb` | Process resident memory, sampled in a background thread during the run. |
+| `rss_after_load_mb`, `peak_rss_mb` | Process resident memory, sampled in a background thread. The peak covers loading the model as well as the run. |
 | `size_on_disk_mb` | Total size of the weight files the backend loads. |
 
 Medians and percentiles are used instead of means because timing noise is
 one-sided: a run can only be slowed down by interference, never sped up.
 
-The harness also stores a hash of the generated token ids per prompt. Two rungs
-with the same hash produced identical text.
+The harness also stores a hash of the generated token ids per prompt
+(`token_hashes`). Two rungs with the same hash produced identical text. It also
+records whether every repeat of a prompt produced the same tokens.
+
+Memory figures include the runtime library itself. On the tiny test model the
+PyTorch process already holds several hundred megabytes before any weights are
+loaded, so compare memory between engines with that fixed cost in mind.
 
 ## Quality (`ladder quality`)
 
@@ -58,6 +63,17 @@ sensitive measure: perplexity can stay flat while individual predictions change.
 
 `--reference 01_torch_fp32` loads the baseline in the same process and compares
 logits window by window. Quality runs are not used for memory figures.
+
+Perplexity uses the W − 1 predictions inside each window of W tokens. Agreement
+and KL compare the two models at all W positions. An incomplete final window is
+dropped.
+
+Quality metrics only see full forward passes, so they cannot tell rung 00 from
+rung 01: the KV-cache affects generation, not a single pass. The check for the
+cache is the token hash in the speed run.
+
+`--text-file PATH` evaluates on a local text file instead of WikiText-2, for
+offline smoke tests. Results from it are not comparable with the real ones.
 
 `--max-windows` limits the evaluation for quick iteration. Reported results use
 the full test split; the number of windows is stored in the result.
